@@ -41,25 +41,32 @@
                                  (key-value "text" text)))))
     (close-input-port (get-pure-port uri))))
 
-;; github event parsing
+;; github payload parsing
 
-(define (get-author data)
-  (~a (hash-ref data 'name)))
-
-(define (get-repo data)
+(define (github/repository data)
   (~a (hash-ref data 'full_name) " (" (hash-ref data 'url) ")"))
 
-(define (get-commit data)
-  (~a "➕ "(hash-ref data 'message) " (" (get-author (hash-ref data 'author)) ") " (hash-ref data 'url)))
+(define (github/commit data)
+  (let ((message (hash-ref data 'message))
+        (author (hash-ref (hash-ref data 'author) 'name))
+        (url (hash-ref data 'url)))
+  (~a "➕ " message " (" author ") " url)))
 
-(define (create-push-notification data)
-  `(,(~a "📥 " (get-author (hash-ref data 'pusher)) " pushed to " (get-repo (hash-ref data 'repository)) ":")
-    ,@(map get-commit (hash-ref data 'commits))
-    ,(~a "🔎 Diff: " (hash-ref data 'compare))))
+(define (github/notification data)
+  (let ((commits (hash-ref data 'commits))
+        (pusher (hash-ref (hash-ref data 'pusher) 'name))
+        (repository (hash-ref data 'repository))
+        (compare-url (hash-ref data 'compare)))
+    `(,(~a "📥 " pusher " pushed to " (github/repository repository) ":")
+      ,@(map github/commit commits)
+      ,(~a "🔎 diff: " compare-url))))
 
-(define (github-hook req)
-  (let ((body (bytes->jsexpr (request-post-data/raw req))))
-    (telegram/send-message (string-join (create-push-notification body) "\n"))
+;; web api
+
+(define (github-hook request)
+  (let ((payload (bytes->jsexpr (request-post-data/raw request))))
+    (telegram/send-message
+     (string-join (github/notification payload) "\n"))
     (response 200 #"OK" (current-seconds) #f empty void)))
 
 (serve/servlet github-hook
