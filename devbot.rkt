@@ -4,6 +4,8 @@
 
 (define telegram/token "109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w")
 
+(define telegram/webhook "http://corvusalba-ci-u.cloudapp.net:8080/telegram")
+
 (require net/url
          net/url-structs
          web-server/servlet
@@ -34,6 +36,14 @@
 
 (define telegram/send-message-url
   (~a telegram/base-url "/sendMessage"))
+
+(define telegram/set-webhook-url
+  (~a telegram/base-url "/setWebhook"))
+
+(define (telegram/set-webhook url)
+  (let ((uri (compose-url telegram/set-webhook-url
+                          (query (key-value "url" url)))))
+    (close-input-port (get-pure-port uri))))
 
 (define (telegram/send-message text)
   (let ((uri (compose-url telegram/send-message-url
@@ -91,6 +101,7 @@
    [("telegram") #:method "post" telegram-hook]
    [("teamcity") #:method "post" teamcity-hook]))
 
+(telegram/set-webhook telegram/webhook)
 (telegram/send-message "Всем пони!")
 
 (serve/servlet hook-dispatch 
