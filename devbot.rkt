@@ -4,7 +4,7 @@
 
 (define telegram/token "109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w")
 
-(define telegram/webhook "corvusalba-ci-u.cloudapp.net:88/telegram")
+;; (define telegram/webhook "corvusalba-ci-u.cloudapp.net:88/telegram")
 
 (require net/url
          net/url-structs
@@ -109,7 +109,7 @@
 (telegram/send-message "Всем пони!")
 
 (serve/servlet hook-dispatch 
-               #:port 88
+               #:port 8080
                #:servlet-path ""
                #:servlet-regexp #rx""
                #:listen-ip #f
