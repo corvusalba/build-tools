@@ -41,6 +41,12 @@
                                  (key-value "text" text)))))
     (close-input-port (get-pure-port uri))))
 
+(define (telegram/handle message)
+  (let ((text (hash-ref message 'text)))
+    (if (regexp-match #rx"пони" text)
+        (telegram/send-message "Дружба - это чудо!")
+        #f)))
+
 ;; github payload parsing
 
 (define (github/repository data)
@@ -73,7 +79,9 @@
   (response 200 #"OK" (current-seconds) #f empty void))
 
 (define (telegram-hook request)
-  (response 200 #"OK" (current-seconds) #f empty void))
+  (let ((payload (bytes->jsexpr (request-post-data/raw request))))
+    (telegram/handle (hash-ref payload 'message))
+    (response 200 #"OK" (current-seconds) #f empty void)))
 
 ;; endpoint configuration
 
@@ -82,6 +90,8 @@
    [("github") #:method "post" github-hook]
    [("telegram") #:method "post" telegram-hook]
    [("teamcity") #:method "post" teamcity-hook]))
+
+(telegram/send-message "Всем пони!")
 
 (serve/servlet hook-dispatch 
                #:port 8080
