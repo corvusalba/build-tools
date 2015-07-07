@@ -61,7 +61,7 @@
       ,@(map github/commit commits)
       ,(~a "🔎 diff: " compare-url))))
 
-;; web api
+;; hooks
 
 (define (github-hook request)
   (let ((payload (bytes->jsexpr (request-post-data/raw request))))
@@ -69,8 +69,23 @@
      (string-join (github/notification payload) "\n"))
     (response 200 #"OK" (current-seconds) #f empty void)))
 
-(serve/servlet github-hook
+(define (teamcity-hook request)
+  (response 200 #"OK" (current-seconds) #f empty void))
+
+(define (telegram-hook request)
+  (response 200 #"OK" (current-seconds) #f empty void))
+
+;; endpoint configuration
+
+(define-values (hook-dispatch hook-url)
+  (dispatch-rules
+   [("github") #:method "post" github-hook]
+   [("telegram") #:method "post" telegram-hook]
+   [("teamcity") #:method "post" teamcity-hook]))
+
+(serve/servlet hook-dispatch 
                #:port 8080
-               #:servlet-path "/github"
+               #:servlet-path ""
+               #:servlet-regexp #rx""
                #:listen-ip #f
                #:command-line? #t)
