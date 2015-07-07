@@ -34,4 +34,6 @@
 
 (serve/servlet hook
                #:port 8080
-               #:servlet-path "/github")
+               #:servlet-path "/github"
+               #:listen-ip #f
+               #:command-line? #t)
