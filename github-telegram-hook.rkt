@@ -38,4 +38,4 @@
 
 (serve/servlet hook
                #:port 8080
-               #:servlet-path "/webhook")
+               #:servlet-path "/guthub")
