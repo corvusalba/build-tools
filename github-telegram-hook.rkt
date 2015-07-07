@@ -17,23 +17,20 @@
   (~a (hash-ref data 'name)))
 
 (define (get-repo data)
-  (~a (hash-ref (hash-ref data 'owner) 'name) "/" (hash-ref data 'name)
-      " <" (hash-ref data 'url) ">")
+  (~a (hash-ref (hash-ref data 'owner) 'name) "/" (hash-ref data 'name) " <" (hash-ref data 'url) ">")
   )  
 
 (define (get-commit data)
-  (~a " - "(hash-ref data 'message) " (" (get-author (hash-ref data 'author))
-      ") " (hash-ref data 'url)))
+  (~a " - "(hash-ref data 'message) " (" (get-author (hash-ref data 'author)) ") " (hash-ref data 'url)))
 
 (define (create-push-notification data)
   `(,(~a "Commits pushed by " (get-author (hash-ref data 'pusher)) " in " (get-repo (hash-ref data 'repository)) ":")
     ,@(map get-commit (hash-ref data 'commits))
-    ,(~a "Compare: " (hash-ref data 'compare))
-   ))
+    ,(~a "Compare: " (hash-ref data 'compare))))
 
 (define (hook req)
   (let ((body (bytes->jsexpr (request-post-data/raw req))))
-    (for-each sendMessage (create-push-notification body))
+    (sendMessage (string-join (create-push-notification body)) "\n")
     (response 200 #"OK" (current-seconds) #f empty void)))
 
 (serve/servlet hook
