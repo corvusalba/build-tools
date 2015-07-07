@@ -1,14 +1,33 @@
 #lang racket
 
+(define telegram/chat_id "-19779793")
+
+(define telegram/token "109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w")
+
 (require net/url
          net/url-structs
          web-server/servlet
          web-server/servlet-env
          json)
 
-(define telegram/chat_id "-19779793")
+;; helpers
 
-(define telegram/token "109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w")
+(define (query . args)
+  args)
+
+(define (key-value key value)
+  (cons key value))
+
+(define (format-key-value item)
+  (~a (car item) "=" (cdr item)))
+
+(define (query->string query)
+  (string-join (map format-key-value query) "&"))
+
+(define (compose-url base query)
+  (string->url (~a base "?" (query->string query))))
+
+;; telegram api client
 
 (define telegram/base-url
   (~a "https://api.telegram.org/bot" telegram/token))
@@ -16,19 +35,13 @@
 (define telegram/send-message-url
   (~a telegram/base-url "/sendMessage"))
 
-(define (query->string query)
-  (string-join
-   (map (lambda (pair) (~a (car pair) "=" (cdr pair))) query)
-   "&"))
-
-(define (compose-url base query)
-  (string->url (~a base "?" (query->string query))))
-
 (define (telegram/send-message text)
   (let ((uri (compose-url telegram/send-message-url
-                          (list (cons "chat_id" telegram/chat_id)
-                                (cons "text" text)))))
+                          (query (key-value "chat_id" telegram/chat_id)
+                                 (key-value "text" text)))))
     (close-input-port (get-pure-port uri))))
+
+;; github event parsing
 
 (define (get-author data)
   (~a (hash-ref data 'name)))
