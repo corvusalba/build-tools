@@ -6,11 +6,28 @@
          web-server/servlet-env
          json)
 
-(define (getSendMessageUri text)
-    (~a "https://api.telegram.org/bot109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w/sendMessage?chat_id=-19779793&text=" text))
+(define telegram/chat_id "-19779793")
 
-(define (sendMessage text)
-  (let ((uri (string->url (getSendMessageUri text))))
+(define telegram/token "109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w")
+
+(define telegram/base-url
+  (~a "https://api.telegram.org/bot" telegram/token))
+
+(define telegram/send-message-url
+  (~a telegram/base-url "/sendMessage"))
+
+(define (query->string query)
+  (string-join
+   (map (lambda (pair) (~a (car pair) "=" (cdr pair))) query)
+   "&"))
+
+(define (compose-url base query)
+  (string->url (~a base "?" (query->string query))))
+
+(define (telegram/send-message text)
+  (let ((uri (compose-url telegram/send-message-url
+                          (list (cons "chat_id" telegram/chat_id)
+                                (cons "text" text)))))
     (close-input-port (get-pure-port uri))))
 
 (define (get-author data)
@@ -27,12 +44,12 @@
     ,@(map get-commit (hash-ref data 'commits))
     ,(~a "🔎 Diff: " (hash-ref data 'compare))))
 
-(define (hook req)
+(define (github-hook req)
   (let ((body (bytes->jsexpr (request-post-data/raw req))))
-    (sendMessage (string-join (create-push-notification body) "\n"))
+    (telegram/send-message (string-join (create-push-notification body) "\n"))
     (response 200 #"OK" (current-seconds) #f empty void)))
 
-(serve/servlet hook
+(serve/servlet github-hook
                #:port 8080
                #:servlet-path "/github"
                #:listen-ip #f
