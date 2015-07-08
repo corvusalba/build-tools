@@ -4,11 +4,7 @@
 
 (define telegram/token "109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w")
 
-<<<<<<< HEAD
-;; (define telegram/webhook "corvusalba-ci-u.cloudapp.net:88/telegram")
-=======
 (define telegram/webhook "devbot.corvusalba.ru/telegram")
->>>>>>> turn on ssl
 
 (require net/url
          net/url-structs
