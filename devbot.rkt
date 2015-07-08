@@ -110,9 +110,7 @@
 (telegram/set-webhook telegram/webhook)
 (telegram/send-message "Всем пони!")
 
-(serve/servlet hook-dispatch                
-	       #:ssl? #t
-	       #:port 443
+(serve/servlet hook-dispatch
                #:servlet-path ""
                #:servlet-regexp #rx""
                #:listen-ip #f
