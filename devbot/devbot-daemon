@@ -7,4 +7,4 @@ fi
 DESC="devbot"
 DAEMON=/usr/bin/racket /home/retran/build-tools/devbot/devbot.rkt
 
-start-stop-daemon --start --exec $DAEMON
+start-stop-daemon --start --exec "$DAEMON"
