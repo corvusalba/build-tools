@@ -88,7 +88,7 @@
 (define (teamcity-hook request)
   (let ((payload (bytes->string/utf-8 (request-post-data/raw request))))
     (telegram/send payload)
-  (response 200 #"OK" (current-seconds) #f empty void))
+  (response 200 #"OK" (current-seconds) #f empty void)))
 
 (define (telegram-hook request)
   (let ((payload (bytes->jsexpr (request-post-data/raw request))))
