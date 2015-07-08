@@ -111,6 +111,7 @@
 (telegram/send-message "Всем пони!")
 
 (serve/servlet hook-dispatch
+               #:port 8080 
                #:servlet-path ""
                #:servlet-regexp #rx""
                #:listen-ip #f
