@@ -5,4 +5,6 @@ if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
 fi
 
 DESC="devbot"
-DAEMON="/usr/bin/racket /home/retran/build-tools/devbot/devbot.rkt"
+DAEMON=/usr/bin/racket /home/retran/build-tools/devbot/devbot.rkt
+
+start-stop-daemon --start --exec $DAEMON
