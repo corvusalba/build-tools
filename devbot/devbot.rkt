@@ -4,7 +4,7 @@
 
 (define telegram/token "109788497:AAGmidxOsCdbMpza1H67ywKljRqQQUXGB6w")
 
-(define telegram/webhook "devbot.corvusalba.ru/telegram")
+(define telegram/webhook "hooks.corvusalba.ru/telegram")
 
 (require net/url
          net/url-structs
@@ -85,7 +85,7 @@
      (string-join (github/notification payload) "\n"))
     (response 200 #"OK" (current-seconds) #f empty void)))
 
-(define (teamcity-hook request)
+(define (builds-hook request)
   (let ((payload (bytes->string/utf-8 (request-post-data/raw request))))
     (telegram/send-message payload)
   (response 200 #"OK" (current-seconds) #f empty void)))
@@ -101,7 +101,7 @@
   (dispatch-rules
    [("github") #:method "post" github-hook]
    [("telegram") #:method "post" telegram-hook]
-   [("teamcity") #:method "post" teamcity-hook]))
+   [("builds") #:method "post" builds-hook]))
 
 (define (start request)
   (displayln request)
