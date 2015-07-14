@@ -42,7 +42,7 @@
 
 (define package-version
   (if (is-snapshot?)
-      (~a (base-version) (if (is-snapshot?) "-snapshot-" "-stable-") padded-build)
+      (~a (base-version) "-snapshot-"  padded-build)
       (base-version)))
 
 (define (get-replacement line)
@@ -66,7 +66,4 @@
 (for-each patch-versions-in-file assembly-info-files)
 
 (displayln
- (~a "##teamcity[buildNumber '" build-number "']"))
-
-(displayln
- (~a "##teamcity[setParameter name='env.packageVersion' value='" package-version "']"))
+ (~a build-number))
