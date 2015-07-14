@@ -2,13 +2,22 @@
 
 (require racket/format)
 (require racket/file)
+(require racket/cmdline)
 
-(define postfix "-linux")
-(define base-version "0.1.4")
-(define build 101)
-(define is-snapshot? #t)
+(define postfix (make-parameter ""))
+(define base-version (make-parameter ""))
+(define build (make-parameter 0))
+(define is-snapshot? (make-parameter #t))
 
 (define temp-filename "temp.tmp")
+
+(command-line
+ #:program "patch-version"
+ #:once-each
+ [("-s" "--stable") "" (is-snapshot? #f)]
+ [("-p" "--postfix") p "" (postfix (~a "-" p))]
+ [("-v" "--base-version") v "" (base-version v)]
+ [("-b" "--build") b "" (build (string->number b))])
 
 (define (is-assembly-info? filename)
   (regexp-match #rx".*AssemblyInfo.cs$" filename))
@@ -20,21 +29,21 @@
   (~a "[assembly: " param "(\"" value "\")]"))
 
 (define padded-build
-  (~r build #:min-width 4 #:pad-string "0"))
+  (~r (build) #:min-width 4 #:pad-string "0"))
 
 (define assembly-version
-  (~a base-version ".0"))
+  (~a (base-version) ".0"))
 
 (define assembly-file-version
-  (~a base-version "." build))
+  (~a (base-version) "." (build)))
 
 (define build-number
-  (~a base-version (if is-snapshot? "-snapshot-" "-release-") padded-build postfix))
+  (~a (base-version) (if (is-snapshot?) "-snapshot-" "-stable-") padded-build (postfix)))
 
 (define package-version
-  (if is-snapshot?
-      build-number
-      base-version))
+  (if (is-snapshot?)
+      (~a (base-version) (if (is-snapshot?) "-snapshot-" "-stable-") padded-build)
+      (base-version)))
 
 (define (get-replacement line)
   (cond
