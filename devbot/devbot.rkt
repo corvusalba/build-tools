@@ -52,10 +52,12 @@
     (close-input-port (get-pure-port uri))))
 
 (define (telegram/handle message)
-  (let ((text (hash-ref message 'text)))
-    (if (regexp-match #rx"пони" text)
-        (telegram/send-message "Дружба - это чудо!")
-        #f)))
+  (if (hash-has-key? message 'text)
+      (let ((text (hash-ref message 'text)))
+        (if (regexp-match #rx"пони" text)
+            (telegram/send-message "Дружба - это чудо!")
+            #f))
+      #f))
 
 ;; github payload parsing
 
