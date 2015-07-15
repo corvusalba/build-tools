@@ -34,7 +34,7 @@ def createLinuxCIFactory():
         command=["xbuild", "CorvusAlba.ToyFactory.Linux.sln"],
         workdir=workingDirectory))
 
-    return linuxci
+    return f
 
 def configure(config):
     # pollers
