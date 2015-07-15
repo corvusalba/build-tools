@@ -51,8 +51,7 @@ def configure(config):
         name="toy-factory-dev-ci",
         change_filter=filter.ChangeFilter(branch='dev'),
         treeStableTimer=None,
-        builderNames=["toy-factory-linux-ci"],
-        project='toy-factory-dev'))
+        builderNames=["toy-factory-linux-ci"]))
 
     config['schedulers'].append(ForceScheduler(
         name="toy-factory-dev-ci-force",
