@@ -15,10 +15,31 @@ from buildbot.steps.transfer import FileUpload
 
 from buildbot.config import BuilderConfig
 
+repositoryUri='git@github.com:retran/toy-factory.git',
+workingDirectory='./build/src/'
+
+def createLinuxCIFactory():
+    f = BuildFactory()
+
+    f.addStep(Git(
+        repourl=repositoryUri,
+        mode='full',
+        method='clobber'))
+
+    f.addStep(ShellCommand(
+        command=["mono", "paket.exe", "restore"],
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        command=["xbuild", "CorvusAlba.ToyFactory.Linux.sln"],
+        workdir=workingDirectory))
+
+    return linuxci
+
 def configure(config):
     # pollers
     config['change_source'].append(GitPoller(
-        'git@github.com:retran/toy-factory.git',
+        repositoryUri,
         workdir='gitpoller-workdir',
         branch='dev',
         pollinterval=60,
@@ -37,29 +58,8 @@ def configure(config):
         name="toy-factory-dev-ci-force",
         builderNames=["toy-factory-linux-ci"]))
 
-    # factories
-    linuxci = BuildFactory()
-
-    workdir = './build/src/'
-
-    linuxci.addStep(Git(
-        repourl='git@github.com:retran/toy-factory.git',
-        mode='full',
-        method='clobber'))
-
-    linuxci.addStep(ShellCommand(
-        command=["mono", "paket.exe", "restore"],
-        workdir=workdir))
-
-    linuxci.addStep(ShellCommand(
-        command=["xbuild", "CorvusAlba.ToyFactory.Linux.sln"],
-        workdir=workdir))
-
-    # factory.addStep(ShellCommand(command=["tar", "-zcvf", "toy-factory.tar.gz", "../bin"], workdir=wdir))
-    # factory.addStep(FileUpload(slavesrc="toy-factory.tar.gz", masterdest="~/toy-factory.tar.gz", workdir=wdir))
-
     # builders
     config['builders'].append(BuilderConfig(
         name="toy-factory-linux-ci",
         slavenames=["linux"],
-        factory=linuxci))
+        factory=createLinuxCIFactory()))
