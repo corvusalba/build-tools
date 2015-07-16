@@ -6,6 +6,7 @@ from buildbot.changes.gitpoller import GitPoller
 
 from buildbot.schedulers.basic import SingleBranchScheduler
 from buildbot.schedulers.forcesched import ForceScheduler
+from buildbot.schedulers.timed import Nightly
 
 from buildbot.process.factory import BuildFactory
 
@@ -119,6 +120,14 @@ def configure(config):
     config['schedulers'].append(ForceScheduler(
         name="toy-factory-dev-ci-force",
         builderNames=["toy-factory-linux-ci"]))
+
+    config['schedulers'].append(Nightly(
+        name='toy-factory-linux-dev-nightly',
+        branch='dev',
+        builderNames=['toy-factory-linux-dev'],
+        hour=3,
+        minute=0,
+        onlyIfChanged=True))
 
     config['schedulers'].append(ForceScheduler(
         name="toy-factory-linux-dev-force",
