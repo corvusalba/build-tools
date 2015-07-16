@@ -11,7 +11,7 @@ from buildbot.process.factory import BuildFactory
 
 from buildbot.steps.source.git import Git
 from buildbot.steps.shell import ShellCommand
-from buildbot.steps.slave import SetPropertiesFromEnv
+from buildbot.steps.shell import SetPropertyFromCommand
 from buildbot.steps.transfer import FileUpload
 
 from buildbot.config import BuilderConfig
