@@ -38,7 +38,7 @@
   (~a (base-version) "." (build)))
 
 (define build-number
-  (~a (base-version) (if (is-snapshot?) "-snapshot-" "-stable-") padded-build (postfix)))
+  (~a (base-version) (postfix) (if (is-snapshot?) "-snapshot-" "-stable-") padded-build))
 
 (define package-version
   (if (is-snapshot?)
