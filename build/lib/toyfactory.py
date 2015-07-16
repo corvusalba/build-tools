@@ -18,8 +18,8 @@ from buildbot.steps.transfer import FileUpload
 from buildbot.config import BuilderConfig
 from buildbot.process.properties import Property,Interpolate
 
-repositoryUri='git@github.com:retran/toy-factory.git',
-workingDirectory='./build/src/'
+repositoryUri="git@github.com:retran/toy-factory.git",
+workingDirectory="./build/src/"
 
 def createLinuxDevFactory():
     f = BuildFactory()
