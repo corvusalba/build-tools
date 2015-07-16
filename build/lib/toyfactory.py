@@ -40,13 +40,13 @@ def createLinuxDevFactory():
         command=["mono", "paket.exe", "restore"],
         workdir=workingDirectory))
 
-    # f.addStep(SetPropertyFromCommand(
-        # description="setting version",
-        # descriptionDone="version",
-        # haltOnFailure=True,
-        # command=["racket", "/home/retran/build-tools/patch-version.rkt", "-p", "linux", "-v", "0.1.4", "-b", Property("buildnumber")],
-        # property = "buildPostfix",
-        # workdir=workingDirectory))
+    f.addStep(SetPropertyFromCommand(
+        description="setting version",
+        descriptionDone="version",
+        haltOnFailure=True,
+        command=["racket", "/home/retran/build-tools/patch-version.rkt", "-p", "linux", "-v", "0.1.4", "-b", Property("buildnumber")],
+        property = "buildPostfix",
+        workdir=workingDirectory))
 
     f.addStep(ShellCommand(
         description="building",
@@ -55,20 +55,20 @@ def createLinuxDevFactory():
         command=["xbuild", "CorvusAlba.ToyFactory.Linux.sln"],
         workdir=workingDirectory))
 
-    # f.addStep(ShellCommand(
-    #     description="archiving",
-        # descriptionDone="archive",
-        # haltOnFailure=True,
-        # command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "../bin"],
-        # workdir=workingDirectory))
+    f.addStep(ShellCommand(
+        description="archiving",
+        descriptionDone="archive",
+        haltOnFailure=True,
+        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "../bin"],
+        workdir=workingDirectory))
 
-    # f.addStep(FileUpload(
-    #     description="uploading",
-        # descriptionDone="upload",
-        # haltOnFailure=True,
-        # slavesrc=Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"),
-        # masterdest=Interpolate("~\builds\toy-factory-%(prop:buildPostfix)s.tar.gz"),
-        # workdir=workingDirectory))
+    f.addStep(FileUpload(
+        description="uploading",
+        descriptionDone="upload",
+        haltOnFailure=True,
+        slavesrc=Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"),
+        masterdest=Interpolate("~\builds\toy-factory-%(prop:buildPostfix)s.tar.gz"),
+        workdir=workingDirectory))
 
     return f
 
