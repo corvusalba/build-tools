@@ -58,15 +58,15 @@ def createLinuxDevFactory():
         description="archiving",
         descriptionDone="archive",
         haltOnFailure=True,
-        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"), "../bin"],
+        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "../bin"],
         workdir=workingDirectory))
 
     f.addStep(FileUpload(
         description="uploading",
         descriptionDone="upload",
         haltOnFailure=True,
-        slavesrc=Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"),
-        masterdest=Interpolate("~\builds\toy-factory-%(prop:buildPostfix).tar.gz)"),
+        slavesrc=Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"),
+        masterdest=Interpolate("~\builds\toy-factory-%(prop:buildPostfix)s.tar.gz"),
         workdir=workingDirectory))
 
     return f
