@@ -22,15 +22,25 @@ def createLinuxCIFactory():
     f = BuildFactory()
 
     f.addStep(Git(
+        description="fetching sources",
+        descriptionDone="sources",
+        haltOnFailure=True,
         repourl=repositoryUri,
         mode='full',
-        method='clobber'))
+        method='clobber',
+    ))
 
     f.addStep(ShellCommand(
+        description="fetching packages",
+        descriptionDone="packages",
+        haltOnFailure=True,
         command=["mono", "paket.exe", "restore"],
         workdir=workingDirectory))
 
     f.addStep(ShellCommand(
+        description="building",
+        descriptionDone="build",
+        haltOnFailure=True,
         command=["xbuild", "CorvusAlba.ToyFactory.Linux.sln"],
         workdir=workingDirectory))
 
