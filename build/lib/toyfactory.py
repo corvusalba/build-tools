@@ -10,11 +10,12 @@ from buildbot.schedulers.forcesched import ForceScheduler
 from buildbot.process.factory import BuildFactory
 
 from buildbot.steps.source.git import Git
-from buildbot.steps.shell import ShellCommand,SetPropertyFromCommand
+from buildbot.steps.shell import ShellCommand
+from buildbot.steps.slave import SetPropertiesFromEnv
 from buildbot.steps.transfer import FileUpload
 
 from buildbot.config import BuilderConfig
-from buildbot import util
+from buildbot.process.properties import Property,Interpolate
 
 repositoryUri='git@github.com:retran/toy-factory.git',
 workingDirectory='./build/src/'
@@ -42,7 +43,7 @@ def createLinuxDevFactory():
         description="setting version",
         descriptionDone="version",
         haltOnFailure=True,
-        command=["racket", "/home/retran/build-tools/patch-version.rkt", "-p", "linux", "-v", "0.1.4", "-b", util.Property("buildnumber")],
+        command=["racket", "/home/retran/build-tools/patch-version.rkt", "-p", "linux", "-v", "0.1.4", "-b", Property("buildnumber")],
         property = "buildPostfix",
         workdir=workingDirectory))
 
@@ -57,15 +58,15 @@ def createLinuxDevFactory():
         description="archiving",
         descriptionDone="archive",
         haltOnFailure=True,
-        command=["tar", "-zcvf", util.Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"), "../bin"],
+        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"), "../bin"],
         workdir=workingDirectory))
 
     f.addStep(FileUpload(
         description="uploading",
         descriptionDone="upload",
         haltOnFailure=True,
-        slavesrc=util.Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"),
-        masterdest=util.Interpolate("~\builds\toy-factory-%(prop:buildPostfix).tar.gz)"),
+        slavesrc=Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"),
+        masterdest=Interpolate("~\builds\toy-factory-%(prop:buildPostfix).tar.gz)"),
         workdir=workingDirectory))
 
     return f
