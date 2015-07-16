@@ -14,9 +14,61 @@ from buildbot.steps.shell import ShellCommand
 from buildbot.steps.transfer import FileUpload
 
 from buildbot.config import BuilderConfig
+from buildbot.plugins import steps, util
 
 repositoryUri='git@github.com:retran/toy-factory.git',
 workingDirectory='./build/src/'
+
+def createLinuxDevFactory():
+    f = BuildFactory()
+
+    f.addStep(Git(
+        description="fetching sources",
+        descriptionDone="sources",
+        haltOnFailure=True,
+        repourl=repositoryUri,
+        mode='full',
+        method='clobber',
+    ))
+
+    f.addStep(ShellCommand(
+        description="fetching packages",
+        descriptionDone="packages",
+        haltOnFailure=True,
+        command=["mono", "paket.exe", "restore"],
+        workdir=workingDirectory))
+
+    f.addStep(SetPropertyFromCommand(
+        description="setting version",
+        descriptionDone="version",
+        haltOnFailure=True,
+        command=["racket", "/home/retran/build-tools/patch-version.rkt", "-p", "linux", "-v", "0.1.4", "-b", util.Property("buildnumber")],
+        property = "buildPostfix",
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="building",
+        descriptionDone="build",
+        haltOnFailure=True,
+        command=["xbuild", "CorvusAlba.ToyFactory.Linux.sln"],
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="archiving",
+        descriptionDone="archive",
+        haltOnFailure=True,
+        command=["tar", "-zcvf", util.Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"), "../bin"],
+        workdir=workingDirectory))
+
+    f.addStep(FileUpload(
+        description="uploading",
+        descriptionDone="upload",
+        haltOnFailure=True,
+        slavesrc=util.Interpolate("toy-factory-%(prop:buildPostfix).tar.gz)"),
+        masterdest=util.Interpolate("~\builds\toy-factory-%(prop:buildPostfix).tar.gz)"),
+        workdir=workingDirectory))
+
+    return f
 
 def createLinuxCIFactory():
     f = BuildFactory()
@@ -67,8 +119,17 @@ def configure(config):
         name="toy-factory-dev-ci-force",
         builderNames=["toy-factory-linux-ci"]))
 
+    config['schedulers'].append(ForceScheduler(
+        name="toy-factory-linux-dev-force",
+        builderNames=["toy-factory-linux-dev"]))
+
     # builders
     config['builders'].append(BuilderConfig(
         name="toy-factory-linux-ci",
         slavenames=["linux"],
         factory=createLinuxCIFactory()))
+
+    config['builders'].append(BuilderConfig(
+        name="toy-factory-linux-dev",
+        slavenames=["linux"],
+        factory=createLinuxDevFactory()))
