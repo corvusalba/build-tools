@@ -66,6 +66,7 @@ def createLinuxDevFactory():
         description="uploading",
         descriptionDone="upload",
         haltOnFailure=True,
+        mode=022,
         slavesrc=Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"),
         masterdest=Interpolate("~/builds/toy-factory-%(prop:buildPostfix)s.tar.gz"),
         workdir=workingDirectory))
