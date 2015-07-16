@@ -10,11 +10,11 @@ from buildbot.schedulers.forcesched import ForceScheduler
 from buildbot.process.factory import BuildFactory
 
 from buildbot.steps.source.git import Git
-from buildbot.steps.shell import ShellCommand
+from buildbot.steps.shell import ShellCommand,SetPropertyFromCommand
 from buildbot.steps.transfer import FileUpload
 
 from buildbot.config import BuilderConfig
-from buildbot.plugins import steps, util
+from buildbot import util
 
 repositoryUri='git@github.com:retran/toy-factory.git',
 workingDirectory='./build/src/'
