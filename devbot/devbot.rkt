@@ -76,7 +76,7 @@
                            (query (key-value "chat_id" telegram/chat_id)
                                   (key-value "reply_to_message_id" message-id)
                                   (key-value "text" "Select builder:")
-                                  (key-value "reply-markup" (uri-encode markup))))))
+                                  (key-value "reply_markup" (uri-encode markup))))))
     (close-input-port (get-pure-port uri))))
 
 (define (telegram/handle message)
