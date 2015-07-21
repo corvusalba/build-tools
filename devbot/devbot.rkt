@@ -175,16 +175,12 @@
    [("telegram") #:method "post" telegram-hook]
    [("builds") #:method "post" builds-hook]))
 
-(define (start request)
-  (displayln request)
-  (hook-dispatch request))
+(telegram/set-webhook telegram/webhook)
+(telegram/send-message "Всем пони!")
 
-;;(telegram/set-webhook telegram/webhook)
-;;(telegram/send-message "Всем пони!")
-
-;;(serve/servlet hook-dispatch
-;;               #:port 8080 
-;;               #:servlet-path ""
-;;               #:servlet-regexp #rx""
-;;               #:listen-ip #f
-;;               #:command-line? #t)
+(serve/servlet hook-dispatch
+               #:port 8080 
+               #:servlet-path ""
+               #:servlet-regexp #rx""
+               #:listen-ip #f
+               #:command-line? #t)
