@@ -29,6 +29,17 @@
 (define (compose-url base query)
   (string->url (~a base "?" (query->string query))))
 
+;; buildbot api client
+
+(define buildbot/base-url "http://buildbot.corvusalba.ru")
+
+(define buildbot/builders-uri
+  (~a buildbot/base-url "/json/builders/?as_text=1"))
+
+(define (buildbot/get-builders)
+  (let ((payload (read-json (get-pure-port (string->url buildbot/builders-uri)))))
+    (sort (map symbol->string (hash-keys payload)) string<?)))
+
 ;; telegram api client
 
 (define telegram/base-url
@@ -51,12 +62,30 @@
                                  (key-value "text" text)))))
     (close-input-port (get-pure-port uri))))
 
+(define (buildbot/select-builder-keyboard)
+  (let ((builders (buildbot/get-builders)))
+    (jsexpr->string (hash
+                     'keyboard (map (lambda (b) (list b b)) builders)
+                     'selective #t))))
+
+(define (telegram/send-select-builder-keyboard message-id)
+  (let* ((markup (buildbot/select-builder-keyboard))
+         (uri (compose-url telegram/send-message-url
+                           (query (key-value "chat_id" telegram/chat_id)
+                                  (key-value "reply_to_message_id" message-id)
+                                  (key-value "text" "Select builder:")
+                                  (key-value "reply-markup" markup)))))
+    (close-input-port (get-pure-port uri))))
+
 (define (telegram/handle message)
   (if (hash-has-key? message 'text)
-      (let ((text (hash-ref message 'text)))
-        (if (regexp-match #rx"пони" text)
-            (telegram/send-message "Дружба - это чудо!")
-            #f))
+      (let ((text (hash-ref message 'text))
+            (message-id (hash-ref message 'message_id)))
+        (cond
+          [(regexp-match #rx"пони" text)
+           (telegram/send-message "Дружба - это чудо!")]
+          [(regexp-match #rx"/build" text)
+           (telegram/send-select-builder-keyboard message-id)]))
       #f))
 
 ;; github payload parsing
@@ -109,12 +138,12 @@
   (displayln request)
   (hook-dispatch request))
 
-(telegram/set-webhook telegram/webhook)
-(telegram/send-message "Всем пони!")
+;;(telegram/set-webhook telegram/webhook)
+;;(telegram/send-message "Всем пони!")
 
-(serve/servlet hook-dispatch
-               #:port 8080 
-               #:servlet-path ""
-               #:servlet-regexp #rx""
-               #:listen-ip #f
-               #:command-line? #t)
+;;(serve/servlet hook-dispatch
+;;               #:port 8080 
+;;               #:servlet-path ""
+;;               #:servlet-regexp #rx""
+;;               #:listen-ip #f
+;;               #:command-line? #t)
