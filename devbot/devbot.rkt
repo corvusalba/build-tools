@@ -59,7 +59,8 @@
 (define (telegram/send-message text)
   (let ((uri (compose-url telegram/send-message-url
                           (query (key-value "chat_id" telegram/chat_id)
-                                 (key-value "text" text)))))
+                                 (key-value "text" text)
+                                 (key-value "disable_web_page_preview" #t))))
     (close-input-port (get-pure-port uri))))
 
 (define (buildbot/select-builder-keyboard)
@@ -74,7 +75,7 @@
                            (query (key-value "chat_id" telegram/chat_id)
                                   (key-value "reply_to_message_id" message-id)
                                   (key-value "text" "Select builder:")
-                                  (key-value "reply-markup" markup)))))
+                                  (key-value "reply-markup" (uri-encode markup))))))
     (close-input-port (get-pure-port uri))))
 
 (define (telegram/handle message)
