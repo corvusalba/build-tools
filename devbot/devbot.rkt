@@ -9,6 +9,7 @@
 (require net/url
          net/url-structs
          net/uri-codec
+         net/head
          web-server/servlet
          web-server/servlet-env
          json)
@@ -37,9 +38,53 @@
 (define buildbot/builders-uri
   (~a buildbot/base-url "/json/builders/?as_text=1"))
 
+(define buildbot/login-uri
+  (~a buildbot/base-url "/login"))
+
+(define (buildbot/builder-uri builder)
+  (~a buildbot/base-url "/builders/" builder "/force"))
+
+(define (buildbot/request-builders)
+  (read-json (get-pure-port
+           (string->url buildbot/builders-uri))))
+
 (define (buildbot/get-builders)
-  (let ((payload (read-json (get-pure-port (string->url buildbot/builders-uri)))))
-    (sort (map symbol->string (hash-keys payload)) string<?)))
+  (let ((payload (buildbot/request-builders)))
+    (sort (map symbol->string (hash-keys payload))
+          string<?)))
+
+(define (buildbot/get-force-scheduler builder)
+  (let* ((builder-data (hash-ref (buildbot/request-builders) (string->symbol builder)))
+         (schedulers (hash-ref builder-data 'schedulers)))
+    (first (filter (lambda (scheduler) (regexp-match #rx"force" scheduler)) schedulers))))
+
+(define (buildbot/login login password)
+  (car
+   (cdr
+    (regexp-match #rx"BuildBotSession=(.+); Exp"
+                  (purify-port
+                   (post-impure-port (string->url buildbot/login-uri)
+                                     (string->bytes/utf-8 (query->string (query (key-value "username" login)
+                                                                                (key-value "passwd" password))))
+                                     (list "Content-Type: application/x-www-form-urlencoded")))))))
+
+(define (buildbot/start-build builder authtoken)
+  (close-input-port
+   (post-pure-port (string->url (buildbot/builder-uri builder))
+                   (string->bytes/utf-8
+                    (query->string
+                     (query (key-value "reason" "forced from telegram")
+                            (key-value "forcescheduler" (buildbot/get-force-scheduler builder)))))
+                   (list "Content-Type: application/x-www-form-urlencoded"
+                         (~a "Cookie: BuildBotSession=" authtoken)))))
+  
+(define (buildbot/select-builder-keyboard)
+  (let ((builders (buildbot/get-builders)))
+    (jsexpr->string (hash
+                     'keyboard (map (lambda (b) (list b)) builders)
+                     'selective #t
+                     'resize_keyboard #t
+                     'one_time_keyboard #t))))
 
 ;; telegram api client
 
@@ -63,15 +108,6 @@
                                  (key-value "text" text)
                                  (key-value "disable_web_page_preview" #t)))))
     (close-input-port (get-pure-port uri))))
-
-(define (buildbot/select-builder-keyboard)
-  (let ((builders (buildbot/get-builders)))
-    (jsexpr->string (hash
-                     'keyboard (map (lambda (b) (list b)) builders)
-                     'selective #t
-                     'resize_keyboard #t
-                     'one_time_keyboard #t))))
-
 
 (define (telegram/send-select-builder-keyboard message-id)
   (let* ((markup (buildbot/select-builder-keyboard))
@@ -143,12 +179,12 @@
   (displayln request)
   (hook-dispatch request))
 
-(telegram/set-webhook telegram/webhook)
-(telegram/send-message "Всем пони!")
+;;(telegram/set-webhook telegram/webhook)
+;;(telegram/send-message "Всем пони!")
 
-(serve/servlet hook-dispatch
-               #:port 8080 
-               #:servlet-path ""
-               #:servlet-regexp #rx""
-               #:listen-ip #f
-               #:command-line? #t)
+;;(serve/servlet hook-dispatch
+;;               #:port 8080 
+;;               #:servlet-path ""
+;;               #:servlet-regexp #rx""
+;;               #:listen-ip #f
+;;               #:command-line? #t)
