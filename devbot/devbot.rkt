@@ -67,8 +67,10 @@
 (define (buildbot/select-builder-keyboard)
   (let ((builders (buildbot/get-builders)))
     (jsexpr->string (hash
-                     'keyboard (map (lambda (b) (list b b)) builders)
-                     'selective #t))))
+                     'keyboard (map (lambda (b) (list b)) builders)
+                     'selective #t
+                     'resize_keyboard #t
+                     'one_time_keyboard #t))))
 
 (define (telegram/send-select-builder-keyboard message-id)
   (let* ((markup (buildbot/select-builder-keyboard))
