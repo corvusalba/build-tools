@@ -8,6 +8,7 @@
 
 (require net/url
          net/url-structs
+         net/uri-codec
          web-server/servlet
          web-server/servlet-env
          json)
