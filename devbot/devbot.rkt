@@ -105,8 +105,8 @@
 (define (telegram/send-message text)
   (let ((uri (compose-url telegram/send-message-url
                           (query (key-value "chat_id" telegram/chat_id)
-                                 (key-value "text" text)
-                                 (key-value "disable_web_page_preview" #t)))))
+                                 (key-value "disable_web_page_preview" #t)
+                                 (key-value "text" text)))))))
     (close-input-port (get-pure-port uri))))
 
 (define (telegram/send-select-builder-keyboard message-id)
@@ -156,7 +156,7 @@
          (build (hash-ref payload 'build))
          (number (hash-ref build 'number))
          (name (hash-ref build 'builderName))
-         (url (~a "http://buildbot.corvuslaba.ru/builders/" name "/builds/" number))
+         (url (~a "http://buildbot.corvusalba.ru/builders/" name "/builds/" number))
          (message (~a "Build " name "#" number " has started." "\n" url)))
     (telegram/send-message message)))
 
