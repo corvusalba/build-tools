@@ -147,7 +147,20 @@
         (compare-url (hash-ref data 'compare)))
     `(,(~a "📥 " pusher " pushed to " (github/repository repository) ":")
       ,@(map github/commit commits)
-      ,(~a "🔎 diff: " compare-url))))
+      ,(~a "🔎 diff: " compare-url)))) 
+
+;; buildbot notifications
+
+(define (buildbot/notification event)
+  (let ((message (jsexpr->string/utf-8 (hash-ref event 'payload))))
+    (telegram/send-message message)))
+
+(define (buildbot/process-payload payload)
+  (let ((events (hash-ref
+                (string/utf-8->json-expr
+                 (~a "{\"packets\":" (substring payload 8) "}"))
+                'packets)))
+    (for-each buildbot/notification events)))
 
 ;; hooks
 
@@ -159,11 +172,11 @@
 
 (define (builds-hook request)
   (let ((payload (bytes->string/utf-8 (request-post-data/raw request))))
-    (telegram/send-message payload)
+    (build-bot/process-payload payload)
   (response 200 #"OK" (current-seconds) #f empty void)))
 
 (define (telegram-hook request)
-  (let ((payload (bytes->jsexpr (request-post-data/raw request))))
+  (let ((payload (bytes->jsexpr (request-post-data/raw request)))) 
     (telegram/handle (hash-ref payload 'message))
     (response 200 #"OK" (current-seconds) #f empty void)))
 
