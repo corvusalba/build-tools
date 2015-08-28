@@ -156,6 +156,7 @@
     (telegram/send-message message)))
 
 (define (buildbot/process-payload payload)
+  (telegram/send-message (~a "{\"packets\":" (substring payload 8) "}"))
   (let ((events (hash-ref
                 (string->jsexpr
                  (~a "{\"packets\":" (substring payload 8) "}"))
