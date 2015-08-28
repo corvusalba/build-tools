@@ -152,7 +152,12 @@
 ;; buildbot notifications
 
 (define (buildbot/notify-build-started event)
-  (let ((message "Build started."))
+  (let* ((payload (hash-ref event 'payload))
+         (build (hash-ref payload 'build))
+         (number (hash-ref build 'number))
+         (name (hash-ref build 'builderName))
+         (url (~a "http://buildbot.corvuslaba.ru/builders/" name "/builds/" number))
+         (message (~a "Build " name "#" number " has started." "\n" url)))
     (telegram/send-message message)))
 
 (define (buildbot/notify-build-finished event)
