@@ -158,7 +158,7 @@
          (number (hash-ref build 'number))
          (name (hash-ref build 'builderName))
          (url (~a "http://buildbot.corvusalba.ru/builders/" name "/builds/" number))
-         (message (~a "Build " name "#" number " has started." "\n" url)))
+         (message (~a "👻 Build " name " #" number " has started." "\n" url)))
     (telegram/send-message message)))
 
 (define (buildbot/notify-build-finished event)
