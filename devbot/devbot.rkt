@@ -162,7 +162,12 @@
     (telegram/send-message message)))
 
 (define (buildbot/notify-build-finished event)
-  (let ((message "Build finished."))
+  (let* ((payload (hash-ref event 'payload))
+         (build (hash-ref payload 'build))
+         (number (hash-ref build 'number))
+         (name (hash-ref build 'builderName))
+         (url (~a "http://buildbot.corvusalba.ru/builders/" name "/builds/" number))
+         (message (~a "👻" " Build " name " " number " has " "finished." "\n🔎 " url)))
     (telegram/send-message message)))
 
 (define (buildbot/notification event)
