@@ -161,13 +161,21 @@
          (message (~a "👻 Build " name " " number " has started." "\n🔎 " url)))
     (telegram/send-message message)))
 
+(define (any proc list)
+  (if (findf proc list) #t #f))
+
 (define (buildbot/notify-build-finished event)
   (let* ((payload (hash-ref event 'payload))
          (build (hash-ref payload 'build))
          (number (hash-ref build 'number))
          (name (hash-ref build 'builderName))
+         (success (any (lambda (v) (string=? v "successful")) (hash-ref build 'text)))
          (url (~a "http://buildbot.corvusalba.ru/builders/" name "/builds/" number))
-         (message (~a "👻" " Build " name " " number " has " "finished." "\n🔎 " url)))
+         (message (~a
+                   (if success "✅" "💩")
+                   " Build " name " " number " has "
+                   (if success "succeeded" "failed")
+                   ".\n🔎 " url)))
     (telegram/send-message message)))
 
 (define (buildbot/notification event)
