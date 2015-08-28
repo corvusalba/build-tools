@@ -151,9 +151,19 @@
 
 ;; buildbot notifications
 
-(define (buildbot/notification event)
-  (let ((message (jsexpr->string event)))
+(define (buildbot/notify-build-started event)
+  (let ((message "Build started."))
     (telegram/send-message message)))
+
+(define (buildbot/notify-build-finished event)
+  (let ((message "Build finished."))
+    (telegram/send-message message)))
+
+(define (buildbot/notification event)
+  (let ((eventName (hash-ref event 'event)))
+    (cond
+      [(string=? eventName "buildStarted") (buildbot/notify-build-started event)]
+      [(string=? eventName "buildFinished") (buildbot/notify-build-finished event)])))
 
 (define (buildbot/process-payload payload)
   (let* ((data (string->jsexpr (~a "{\"packets\":" (substring payload 8) "}")))
