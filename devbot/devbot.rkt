@@ -156,30 +156,28 @@
     (telegram/send-message message)))
 
 (define (buildbot/process-payload payload)
-  (telegram/send-message (~a "{\"packets\":" (substring payload 8) "}"))
-  (let ((events (hash-ref
-                (string->jsexpr
-                 (~a "{\"packets\":" (substring payload 8) "}"))
-                'packets)))
-    (for-each buildbot/notification events)))
+  (let ((data (~a "{\"packets\":" (substring payload 8) "}")))
+    (telegram/send-message data)
+    (let ((events (hash-ref data 'packets)))
+      (for-each buildbot/notification events))))
 
 ;; hooks
 
 (define (github-hook request)
   (let ((payload (bytes->jsexpr (request-post-data/raw request))))
     (telegram/send-message
-     (string-join (github/notification payload) "\n"))
-    (response 200 #"OK" (current-seconds) #f empty void)))
+     (string-join (github/notification payload) "\n")))
+  (response 200 #"OK" (current-seconds) #f empty void))
 
 (define (builds-hook request)
   (let ((payload (bytes->string/utf-8 (request-post-data/raw request))))
-    (buildbot/process-payload payload)
-  (response 200 #"OK" (current-seconds) #f empty void)))
+    (buildbot/process-payload payload))
+  (response 200 #"OK" (current-seconds) #f empty void))
 
 (define (telegram-hook request)
   (let ((payload (bytes->jsexpr (request-post-data/raw request)))) 
-    (telegram/handle (hash-ref payload 'message))
-    (response 200 #"OK" (current-seconds) #f empty void)))
+    (telegram/handle (hash-ref payload 'message)))
+  (response 200 #"OK" (current-seconds) #f empty void))
 
 ;; endpoint configuration
 
