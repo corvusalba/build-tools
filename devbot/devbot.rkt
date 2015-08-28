@@ -152,8 +152,8 @@
 ;; buildbot notifications
 
 (define (buildbot/notification event)
-  (let ((message (jsexpr->string event))))
-    (telegram/send-message message))
+  (let ((message (jsexpr->string event)))
+    (telegram/send-message message)))
 
 (define (buildbot/process-payload payload)
   (let* ((data (string->jsexpr (~a "{\"packets\":" (substring payload 8) "}")))
