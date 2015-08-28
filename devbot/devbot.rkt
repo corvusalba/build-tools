@@ -125,8 +125,9 @@
         (cond
           [(regexp-match #rx"пони" text)
            (telegram/send-message "Дружба - это чудо!")]
-          [(regexp-match #rx"/build" text)
-           (telegram/send-select-builder-keyboard message-id)]))
+;;          [(regexp-match #rx"/build" text)
+;;          (telegram/send-select-builder-keyboard message-id)]
+        ))
       #f))
 
 ;; github payload parsing
