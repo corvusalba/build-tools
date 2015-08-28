@@ -172,7 +172,7 @@
 
 (define (builds-hook request)
   (let ((payload (bytes->string/utf-8 (request-post-data/raw request))))
-    (build-bot/process-payload payload)
+    (buildbot/process-payload payload)
   (response 200 #"OK" (current-seconds) #f empty void)))
 
 (define (telegram-hook request)
