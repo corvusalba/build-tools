@@ -152,13 +152,13 @@
 ;; buildbot notifications
 
 (define (buildbot/notification event)
-  (let ((message (jsexpr->string (hash-ref event 'payload))))
-    (telegram/send-message message)))
+  (let ((message (jsexpr->string event))))
+    (telegram/send-message message))
 
 (define (buildbot/process-payload payload)
-  (let ((data (string->jsexpr (~a "{\"packets\":" (substring payload 8) "}"))))
-    (let ((events (hash-ref data 'packets)))
-      (for-each buildbot/notification events))))
+  (let* ((data (string->jsexpr (~a "{\"packets\":" (substring payload 8) "}")))
+        (events (hash-ref data 'packets)))
+      (for-each buildbot/notification events)))
 
 ;; hooks
 
