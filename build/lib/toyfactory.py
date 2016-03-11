@@ -44,7 +44,7 @@ def createWindowsDevFactory():
         description="setting version",
         descriptionDone="version",
         haltOnFailure=True,
-        command=["racket", "c:\build-tools\patch-version.rkt", "-p", "windows", "-v", "0.1.4", "-b", Property("buildnumber")],
+        command=["racket", "c:\\build-tools\\patch-version.rkt", "-p", "windows", "-v", "0.1.4", "-b", Property("buildnumber")],
         property = "buildPostfix",
         workdir=workingDirectory))
 
@@ -59,7 +59,7 @@ def createWindowsDevFactory():
         description="archiving",
         descriptionDone="archive",
         haltOnFailure=True,
-        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "..\bin"],
+        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "..\\bin"],
         workdir=workingDirectory))
 
     f.addStep(FileUpload(
