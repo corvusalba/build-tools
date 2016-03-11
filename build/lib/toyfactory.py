@@ -59,7 +59,7 @@ def createWindowsDevFactory():
         description="archiving",
         descriptionDone="archive",
         haltOnFailure=True,
-        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "..\\bin"],
+        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "../bin"],
         workdir=workingDirectory))
 
     f.addStep(FileUpload(
