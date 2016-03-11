@@ -21,6 +21,58 @@ from buildbot.process.properties import Property,Interpolate
 repositoryUri="git@github.com:retran/toy-factory.git"
 workingDirectory="./build/src/"
 
+def createWindowsDevFactory():
+    f = BuildFactory()
+
+    f.addStep(Git(
+        description="fetching sources",
+        descriptionDone="sources",
+        haltOnFailure=True,
+        repourl=repositoryUri,
+        mode='full',
+        method='clobber',
+    ))
+
+    f.addStep(ShellCommand(
+        description="fetching packages",
+        descriptionDone="packages",
+        haltOnFailure=True,
+        command=["paket.exe", "restore"],
+        workdir=workingDirectory))
+
+    f.addStep(SetPropertyFromCommand(
+        description="setting version",
+        descriptionDone="version",
+        haltOnFailure=True,
+        command=["racket", "c:\build-tools\patch-version.rkt", "-p", "windows", "-v", "0.1.4", "-b", Property("buildnumber")],
+        property = "buildPostfix",
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="building",
+        descriptionDone="build",
+        haltOnFailure=True,
+        command=["msbuild", "CorvusAlba.ToyFactory.Windows.sln"],
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="archiving",
+        descriptionDone="archive",
+        haltOnFailure=True,
+        command=["tar", "-zcvf", Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"), "..\bin"],
+        workdir=workingDirectory))
+
+    f.addStep(FileUpload(
+        description="uploading",
+        descriptionDone="upload",
+        haltOnFailure=True,
+        mode=0644,
+        slavesrc=Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"),
+        masterdest=Interpolate("~/builds/toy-factory-%(prop:buildPostfix)s.tar.gz"),
+        workdir=workingDirectory))
+
+    return f
+
 def createLinuxDevFactory():
     f = BuildFactory()
 
@@ -153,14 +205,14 @@ def configure(config):
     config['schedulers'].append(Nightly(
         name='toy-factory-dev-nightly',
         branch='dev',
-        builderNames=['toy-factory-linux-dev'],
+        builderNames=["toy-factory-linux-dev", "toy-factory-windows-dev"],
         hour=3,
         minute=0,
         onlyIfChanged=True))
 
     config['schedulers'].append(ForceScheduler(
-        name="toy-factory-linux-dev-force",
-        builderNames=["toy-factory-linux-dev"]))
+        name="toy-factory-dev-force",
+        builderNames=["toy-factory-linux-dev", "toy-factory-windows-dev"]))
 
     # builders
     config['builders'].append(BuilderConfig(
@@ -176,4 +228,9 @@ def configure(config):
     config['builders'].append(BuilderConfig(
         name="toy-factory-linux-dev",
         slavenames=["linux"],
+        factory=createLinuxDevFactory()))
+
+    config['builders'].append(BuilderConfig(
+        name="toy-factory-windows-dev",
+        slavenames=["windows"],
         factory=createLinuxDevFactory()))
