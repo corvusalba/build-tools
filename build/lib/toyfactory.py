@@ -75,7 +75,7 @@ def createWindowsDevFactory():
         description="tagging",
         descriptionDone="tagged",
         haltOnFailure=True,
-        command=["git", "tag", "-a", Interpolate("%(prop:buildPostfix)s")],
+        command=["git", "tag", "-a", Interpolate("%(prop:buildPostfix)s"), "-m", "'build succesfull'"],
         workdir=workingDirectory))
 
     f.addStep(ShellCommand(
@@ -141,7 +141,7 @@ def createLinuxDevFactory():
         description="tagging",
         descriptionDone="tagged",
         haltOnFailure=True,
-        command=["git", "tag", "-a", Interpolate("%(prop:buildPostfix)s")],
+        command=["git", "tag", "-a", Interpolate("%(prop:buildPostfix)s"), "-m", "'build succesfull'"],
         workdir=workingDirectory))
 
     f.addStep(ShellCommand(
