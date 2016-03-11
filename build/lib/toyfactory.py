@@ -233,4 +233,4 @@ def configure(config):
     config['builders'].append(BuilderConfig(
         name="toy-factory-windows-dev",
         slavenames=["windows"],
-        factory=createLinuxDevFactory()))
+        factory=createWindowsDevFactory()))
