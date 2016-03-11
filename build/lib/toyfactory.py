@@ -73,6 +73,34 @@ def createLinuxDevFactory():
 
     return f
 
+def createWindowsCIFactory():
+    f = BuildFactory()
+
+    f.addStep(Git(
+        description="fetching sources",
+        descriptionDone="sources",
+        haltOnFailure=True,
+        repourl=repositoryUri,
+        mode='full',
+        method='clobber',
+    ))
+
+    f.addStep(ShellCommand(
+        description="fetching packages",
+        descriptionDone="packages",
+        haltOnFailure=True,
+        command=["paket.exe", "restore"],
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="building",
+        descriptionDone="build",
+        haltOnFailure=True,
+        command=["C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe", "CorvusAlba.ToyFactory.Windows.sln"],
+        workdir=workingDirectory))
+
+    return f
+
 def createLinuxCIFactory():
     f = BuildFactory()
 
@@ -116,14 +144,14 @@ def configure(config):
         name="toy-factory-dev-ci",
         change_filter=filter.ChangeFilter(branch='dev'),
         treeStableTimer=None,
-        builderNames=["toy-factory-linux-ci"]))
+        builderNames=["toy-factory-linux-ci", "toy-factory-windows-ci"]))
 
     config['schedulers'].append(ForceScheduler(
         name="toy-factory-dev-ci-force",
-        builderNames=["toy-factory-linux-ci"]))
+        builderNames=["toy-factory-linux-ci", "toy-factory-windows-ci"]))
 
     config['schedulers'].append(Nightly(
-        name='toy-factory-linux-dev-nightly',
+        name='toy-factory-dev-nightly',
         branch='dev',
         builderNames=['toy-factory-linux-dev'],
         hour=3,
@@ -139,6 +167,11 @@ def configure(config):
         name="toy-factory-linux-ci",
         slavenames=["linux"],
         factory=createLinuxCIFactory()))
+
+    config['builders'].append(BuilderConfig(
+        name="toy-factory-windows-ci",
+        slavenames=["windows"],
+        factory=createWindowsCIFactory()))
 
     config['builders'].append(BuilderConfig(
         name="toy-factory-linux-dev",
