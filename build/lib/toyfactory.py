@@ -71,6 +71,20 @@ def createWindowsDevFactory():
         masterdest=Interpolate("~/builds/toy-factory-%(prop:buildPostfix)s.tar.gz"),
         workdir=workingDirectory))
 
+    f.addStep(ShellCommand(
+        description="tagging",
+        descriptionDone="tagged",
+        haltOnFailure=True,
+        command=["git", "tag", "-a", Interpolate("%(prop:buildPostfix)s")],
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="pushing tags",
+        descriptionDone="tags pushed",
+        haltOnFailure=True,
+        command=["git", "push", "origin", Interpolate("%(prop:buildPostfix)s")],
+        workdir=workingDirectory))
+
     return f
 
 def createLinuxDevFactory():
@@ -121,6 +135,20 @@ def createLinuxDevFactory():
         mode=0644,
         slavesrc=Interpolate("toy-factory-%(prop:buildPostfix)s.tar.gz"),
         masterdest=Interpolate("~/builds/toy-factory-%(prop:buildPostfix)s.tar.gz"),
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="tagging",
+        descriptionDone="tagged",
+        haltOnFailure=True,
+        command=["git", "tag", "-a", Interpolate("%(prop:buildPostfix)s")],
+        workdir=workingDirectory))
+
+    f.addStep(ShellCommand(
+        description="pushing tags",
+        descriptionDone="tags pushed",
+        haltOnFailure=True,
+        command=["git", "push", "origin", Interpolate("%(prop:buildPostfix)s")],
         workdir=workingDirectory))
 
     return f
