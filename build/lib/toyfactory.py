@@ -96,7 +96,7 @@ def createWindowsCIFactory():
         description="building",
         descriptionDone="build",
         haltOnFailure=True,
-        command=["C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe", "CorvusAlba.ToyFactory.Windows.sln"],
+        command=["msbuild.exe", "CorvusAlba.ToyFactory.Windows.sln"],
         workdir=workingDirectory))
 
     return f
